@@ -46,13 +46,21 @@ public class ReadTicketFlyHTML {
 									"hi-dive",
 									"globe-hall",
 									"cervantes"};
+	private static String[] genres = {"rock", "pop", "rap", "country", "folk",
+									  "r&b", "latin", "edm", "experimental", "garage" 
+									  };
 	private static String GetVenueEventListQuery = "";
+	private static String GetLastFMArtist = "/2.0/?method=artist.search&artist=";
+	private static String LastFMAPIKey = "&api_key=e8157cda22779739786019569aed2e73&format=json";
 	
 	//=============================================================
 	
 	public ReadTicketFlyHTML(Logger loggerArg) {
 		myLogger = loggerArg;
-		gatherEventDataViaAPI();
+		testGenreGet("Karl Blau");
+		testGenreGet("Cher");
+		testGenreGet("Bad Licks");
+		//gatherEventDataViaAPI();
 	}
 	
 	private void gatherEventDataViaAPI() {
@@ -96,6 +104,51 @@ public class ReadTicketFlyHTML {
 	
 	public ArrayList<Event> getEventMasterList() {
 		return eventMasterList;
+	}
+	
+	private void testGenreGet(String bandName) {
+		//validate band name
+		String validatedBandName = validateBandName(bandName);
+		
+		//make the connection object
+		HttpURLConnection connection = null;
+		String charset = "UTF-8";
+		try {
+			//make the URL object
+			URL currentURL = new URL(GetLastFMArtist + bandName + LastFMAPIKey);
+			//open the connection
+			connection = (HttpURLConnection) currentURL.openConnection();
+			connection.setRequestProperty("Accept-Charset", charset);
+			InputStream response = connection.getInputStream();
+			//check for error code
+			//if good code
+			//get the name value from the first artistmatch in the json response
+			//send another request to get the toptags for the artistname
+			//check for error code
+			//if good code
+			//take tag elements
+			//send tag elements into tag understander method
+		}
+		catch (MalformedURLException badURL) {
+			myLogger.addErrorMessage("A venue URL is bogus, man.");
+		}
+		catch (IOException e) {
+			myLogger.addErrorMessage("A venue URL connection failed.");
+		}
+	}
+	
+	private String validateBandName(String bandNameArg) {
+		//remove spaces from bandName
+	    char[] bandNameAsCharArray= bandNameArg.toCharArray();
+	    for (char currentChar : bandNameAsCharArray) {
+	    	if (currentChar == ' ') {
+	    		currentChar = '+';
+	    	}
+	    }
+	    
+	    //TODO: does the caps matter?
+	    //TODO: we're gonna need more validation than this, holmes
+	    return new String(bandNameAsCharArray);
 	}
 }
 
